@@ -1,7 +1,7 @@
 
-# Exploring Shallow Preference Signals in Human Feedback: Insights into Efficient Large Language Model Alignment
+# Shallow Preference Signals: Efficient Large Language Model Alignment with Truncated Data
 
-This repository contains the code and models for the work presented in the paper "**Exploring Shallow Preference Signals in Human Feedback: Insights into Efficient Large Language Model Alignment**". In this work, we investigate the concept of shallow preference signals, showing that human preferences in language model outputs are often concentrated in the early part of the response rather than being evenly distributed. We explore how truncating responses at various points can significantly improve the efficiency of preference-based optimization methods like Reinforcement Learning from Human Feedback (RLHF) and Direct Preference Optimization (DPO).
+This repository contains the code and models for the work presented in the paper "**Shallow Preference Signals: Efficient Large Language Model Alignment with Truncated Data**". In this work, we investigate the concept of shallow preference signals, showing that human preferences in language model outputs are often concentrated in the early part of the response rather than being evenly distributed. We explore how truncating responses at various points can significantly improve the efficiency of preference-based optimization methods like Reinforcement Learning from Human Feedback (RLHF) and Direct Preference Optimization (DPO).
 
 <figure>
   <img src="./figure1.pdf" alt="" />
