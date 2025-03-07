@@ -36,62 +36,65 @@ pip install -r requirements.txt
 
 We have provided all the necessary scripts and configurations to reproduce the experiments discussed in our paper. The core process involves truncating preference datasets, training reward models, and fine-tuning models using DPO.
 
-### Step 1: Data Preprocessing
+### Data Preprocessing
 You can preprocess the preference datasets and create truncated versions using the provided script:
 
 ```bash
-python preprocess.py --input /path/to/dataset --output /path/to/output --truncate_percentage 50
+python src/preprocess.py --input_dir /path/to/input_dataset --output_dir /path/to/output_dataset --truncate_ratio 50
 ```
 
 This will create a truncated dataset retaining 50% of the response tokens.
 
-### Step 2: Training Reward Models
-To train reward models on truncated data, use the following command:
+### Experiment: Truncation Effects on Reward Models and DPO
+
+#### Training Reward Models and DPO models
+For training the reward model and fine-tuning the model with DPO, we referred to [RLHFlow](<https://github.com/RLHFlow/RLHF-Reward-Modeling/tree/main/bradley-terry-rm>) and [OpenRLHF](<https://github.com/OpenRLHF/OpenRLHF>), using the default parameters from each.
+
+#### Evaluate Models with RewardBench and Alpaca-Eval
+For testing the model performance on rewardbench and alpaca-eval, we referred to [rewardbench](<https://github.com/allenai/reward-bench>) and [alpaca-eval](<https://github.com/tatsu-lab/alpaca_eval>), using the default evaluation sets. The model responses generated for alpaca-eval can be done as follows:
 
 ```bash
-python train_reward_model.py --data /path/to/truncated/dataset --output /path/to/output
+python src/get_model_response.py --model_path /path/to/model --model_name name_of_model_in_alpaca-eval
 ```
 
-### Step 3: Fine-tuning with DPO
-To fine-tune a model using DPO, execute:
+### Experiment: KL Divergence and Reward-KL Tradeoff for Evaluating Response Quality
+
+#### KL Divergence Across Token Positions
+
+##### Using default model paths
+```bash
+python src/experiment_6.1.py --dataset ultrafeedback --a 0.5
+```
+
+##### Specifying all parameters
+```bash
+python src/experiment_6.1.py --dpo_model_path /path/to/dpo_model --ref_model_path /path/to/ref_model --reward_model_path /path/to/reward_model --dataset alpaca --a 0.5 --num_samples 1
+```
+
+#### Reward-KL Tradeoff for Length Control and KL Threshold Control Decoding
+
+##### Length Control
 
 ```bash
-python fine_tune_dpo.py --data /path/to/truncated/dataset --output /path/to/output
+python src/experiment_6.2_length.py --dataset ultrafeedback --t_values 5 10 15
 ```
 
-This will train the model using Direct Preference Optimization on the truncated data.
-
-### Step 4: Evaluating the Model
-To evaluate the performance of the trained model, use the following command:
+##### Threshold Control
 
 ```bash
-python evaluate.py --model /path/to/trained/model --dataset /path/to/test/dataset
+python src/experiment_6.2_threshold.py --dataset ultrafeedback --threshold_values 0.1 0.5 1.0
 ```
 
-This will output the accuracy and other performance metrics.
+# Full customization
+python script.py --dpo_model_name /path/to/dpo --ref_model_name /path/to/ref --reward_model_name /path/to/reward \
+                --dataset alpaca --threshold_values 0.2 0.4 0.6 0.8 \
+                --mixed_mode --a 0.3 --num_samples 3 --max_questions 50 --max_tokens 256
 
-## Experiments and Results
+<!-- ## Experiments and Results
 
 The results of our experiments, such as the comparison between models trained on full and truncated datasets, are provided in the paper and corresponding evaluation files. These results show the performance across various truncation ratios and the effectiveness of our approach in both reward modeling and Direct Preference Optimization (DPO).
 
 ## Decoding Strategies
 
-We also propose two novel decoding strategies: **Length Control Decoding** and **KL Threshold Control Decoding**, both of which prioritize the early portion of the response to maximize the reward-KL trade-off. These strategies can be enabled by setting the respective flags in the configuration.
+We also propose two novel decoding strategies: **Length Control Decoding** and **KL Threshold Control Decoding**, both of which prioritize the early portion of the response to maximize the reward-KL trade-off. These strategies can be enabled by setting the respective flags in the configuration. -->
 
-## Citation
-
-<!-- If you find this work useful in your research, please cite our paper:
-
-```
-@article{yourpaper,
-  title={Exploring Shallow Preference Signals in Human Feedback: Insights into Efficient Large Language Model Alignment},
-  author={Author1, Author2, Author3},
-  journal={arXiv},
-  year={2024},
-  url={https://arxiv.org/abs/xxxx.xxxxx}
-} -->
-```
-
-<!-- ## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details. -->
