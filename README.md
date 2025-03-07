@@ -4,7 +4,7 @@
 This repository contains the code and models for the work presented in the paper "**Shallow Preference Signals: Efficient Large Language Model Alignment with Truncated Data**". In this work, we investigate the concept of shallow preference signals, showing that human preferences in language model outputs are often concentrated in the early part of the response rather than being evenly distributed. We explore how truncating responses at various points can significantly improve the efficiency of preference-based optimization methods like Reinforcement Learning from Human Feedback (RLHF) and Direct Preference Optimization (DPO).
 
 <figure>
-  <img src="./figure1.pdf" alt="" />
+  <img src="./figure1.jpg" alt="" />
   <figcaption>An example illustrating the phenomenon of shallow preference signals. It demonstrates how the relative quality of two responses can be determined from the early portion of the response, or even from the first sentence. Training with only the initial part allows the model to capture most of the preference signals while conserving resources.</figcaption>
 </figure>
 
@@ -85,16 +85,49 @@ python src/experiment_6.2_length.py --dataset ultrafeedback --t_values 5 10 15
 python src/experiment_6.2_threshold.py --dataset ultrafeedback --threshold_values 0.1 0.5 1.0
 ```
 
-# Full customization
-python script.py --dpo_model_name /path/to/dpo --ref_model_name /path/to/ref --reward_model_name /path/to/reward \
-                --dataset alpaca --threshold_values 0.2 0.4 0.6 0.8 \
-                --mixed_mode --a 0.3 --num_samples 3 --max_questions 50 --max_tokens 256
+## Experiment Results
 
-<!-- ## Experiments and Results
+###  RewardBench Results
 
-The results of our experiments, such as the comparison between models trained on full and truncated datasets, are provided in the paper and corresponding evaluation files. These results show the performance across various truncation ratios and the effectiveness of our approach in both reward modeling and Direct Preference Optimization (DPO).
+| Dataset | Dimension | Original Dataset | 50% | 40% | 33% | 25% |
+|---------|-----------|------------------|-----|-----|-----|-----|
+| **Skywork-Preference** | Chat | **0.8073** | _0.7318_ | 0.7039 | 0.5866 | 0.5978 |
+|  | Chat-Hard | _0.7039_ | **0.7105** | 0.6974 | 0.6776 | 0.6732 |
+|  | Safety | **0.8216** | 0.8068 | 0.7946 | _0.8162_ | 0.8030 |
+|  | Reasoning | 0.7043 | _0.7769_ | **0.8101** | 0.7064 | 0.7450 |
+|  | Total | 0.7585 | _0.7588_ | **0.7635** | 0.7000 | 0.6992 |
+| **UltraFeedback** | Chat | 0.7946 | **0.8098** | _0.8073_ | 0.7844 | 0.7644 |
+|  | Chat-Hard | 0.6029 | **0.6425** | _0.6342_ | 0.5983 | 0.5946 |
+|  | Safety | 0.7416 | _0.7632_ | **0.7848** | 0.7384 | 0.6756 |
+|  | Reasoning | **0.7056** | _0.6904_ | 0.6682 | 0.6886 | 0.5646 |
+|  | Total | **0.7391** | _0.7327_ | 0.7194 | 0.7018 | 0.6355 |
+| **RLHFlow-Preference** | Chat | **0.9553** | _0.9302_ | 0.9287 | 0.8574 | 0.8291 |
+|  | Chat-Hard | _0.4517_ | **0.4561** | 0.4506 | 0.4323 | 0.4127 |
+|  | Safety | **0.6730** | _0.6621_ | 0.6438 | 0.5985 | 0.6081 |
+|  | Reasoning | 0.5984 | **0.8374** | _0.7894_ | 0.6247 | 0.5723 |
+|  | Total | 0.6596 | **0.7216** | _0.6971_ | 0.6244 | 0.5562 |
 
-## Decoding Strategies
+Performance of reward models trained on different truncation ratios for various datasets. The table presents the evaluation scores across multiple dimensions from the RewardBench core set: **Chat**, **Chat-Hard**, **Safety** and **Reasoning**. **Total** is the final score on the RewardBench core set. **Skywork-Preference** refers to Skywork-Reward-Preference-80K-v0.2 dataset, **UltraFeedback** refers to ultrafeedback-binarized dataset, **RLHFlow-Preference** refers to RLHFlow-pair-data-v2-80K-wsafety dataset. **Original Dataset** refers to the model trained on the full dataset without truncation; **50%**, **40%**, **33%**, and **25%** refer to datasets where the responses are truncated to retain 50%, 40%, 33%, and 25% of the original token length, respectively. The highest score in each row is indicated in **bold**, and the second-highest score is indicated with _italics_.
 
-We also propose two novel decoding strategies: **Length Control Decoding** and **KL Threshold Control Decoding**, both of which prioritize the early portion of the response to maximize the reward-KL trade-off. These strategies can be enabled by setting the respective flags in the configuration. -->
+###  Evaluation of Reward Models on Each Task of UltraFeedbac
+
+| Task | Original Dataset | 50% | 40% | 30% | 20% | 10% |
+|------|------------------|-----|-----|-----|-----|-----|
+| Helpfulness | 0.89 | **0.90** | **0.90** | 0.87 | 0.82 | 0.73 |
+| Honesty | _0.87_ | **0.88** | _0.87_ | 0.84 | 0.79 | 0.76 |
+| Instruction Following | **0.91** | **0.91** | 0.86 | 0.87 | 0.74 | 0.69 |
+| Truthfulness | **0.85** | _0.84_ | _0.84_ | 0.83 | 0.81 | 0.64 |
+| Average | _0.88_ | **0.8825** | 0.87 | 0.855 | 0.795 | 0.705 |
+
+UltraFeedback test accuracy across different tasks with various truncation ratios. The table presents the test accuracy for each task in the UltraFeedback dataset, with different truncation ratios: **Original Dataset** refers to the model evaluated on the full, unmodified UltraFeedback dataset; **50%**, **40%**, **30%**, **20%**, and **10%** refer to models evaluated using truncated versions of the dataset, where the response portion is truncated to 50%, 40%, 30%, 20%, and 10% of the original length, respectively. The tasks listed include: **Helpfulness**, **Honesty**, **Instruction Following**, and **Truthfulness**. **Average** represents the mean accuracy across all tasks for each truncation ratio. The highest score in each row is indicated in **bold**, and the second-highest score is indicated with _italics_.
+
+### DPO Fine-tuned Model Performance
+
+| Metric | Llama3.1 8B | Original Dataset | 50% | 40% | 33% | 25% |
+|--------|-------------|------------------|-----|-----|-----|-----|
+| LCWR | 21.45 | _24.90_ | **25.19** | 24.85 | 23.51 | 21.13 |
+| WR | 22.37 | _23.92_ | **24.15** | 23.57 | 23.43 | 20.96 |
+
+Performance of DPO models with different truncation ratios. The table presents the evaluation metrics for both the original model and the DPO models trained on truncated datasets: **Llama3.1 8B** refers to the original Llama-3.1-8B-Instruct model; **Original Dataset** refers to the Llama-3.1-8B-Instruct model fine-tuned using the full Skywork-Reward-Preference-80K-v0.2 dataset with the DPO algorithm; **50%**, **40%**, **33%**, and **25%** refer to models fine-tuned using truncated versions of the dataset, where the response portion is truncated to 50%, 40%, 33%, and 25% of the original length, respectively. **LCWR** refers to Length-controlled Win Rate and **WR** refers to Win Rate. The highest score in each row is indicated in **bold**, and the second-highest score is indicated with _italics_.
+
 
